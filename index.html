@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#123c4a">
+<title>GloryFit Health Analyzer</title>
+<style>
+:root{--ink:#17323c;--muted:#647780;--teal:#087e8b;--mint:#dff5ef;--bg:#f3f7f8;--card:#fff;--line:#e0e9ec;--orange:#b85d12;--red:#b83a42;--green:#18754a;--blue:#376cbd}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+header{background:linear-gradient(135deg,#123c4a,#087e8b);color:white;padding:24px 18px 22px;border-radius:0 0 24px 24px}
+.headrow{display:flex;gap:12px;align-items:center}.logo{width:52px;height:52px;border-radius:15px;background:#ffffff22;display:grid;place-items:center;font-size:27px;flex-shrink:0}
+h1{font-size:24px;line-height:1.15;margin:0 0 5px}header p{margin:0;color:#e2f4f5;font-size:14px}
+main{max-width:1000px;margin:0 auto;padding:16px 14px 40px}.notice{padding:12px 14px;border-radius:14px;background:#fff8e8;color:#694b17;border:1px solid #f1dfb8;font-size:13px;margin-bottom:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 14px;box-shadow:0 3px 12px #17323c08}
+h2{font-size:19px;margin:0 0 10px}h3{font-size:15px;margin:0 0 8px}
+.sub{color:var(--muted);font-size:13px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+button,.button{border:0;border-radius:12px;background:var(--teal);color:white;padding:12px 15px;font-size:15px;font-weight:650;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px}
+button.secondary,.button.secondary{background:#e8f3f4;color:#15515b;border:1px solid #c9e2e5}button.ghost{background:white;color:var(--ink);border:1px solid var(--line)}
+input[type=file]{display:none}.filelabel{display:inline-flex}
+.status{font-size:13px;margin-top:10px;color:var(--muted);overflow-wrap:anywhere}.status.good{color:var(--green)}.status.bad{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:13px;border-radius:15px;background:#f7fafb;border:1px solid var(--line);min-width:0}.metric .label{font-size:12px;color:var(--muted);font-weight:650}.metric .value{font-size:24px;font-weight:750;letter-spacing:-.5px;margin:3px 0}.metric .hint{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:7px;overflow:auto;padding-bottom:2px;margin-bottom:12px}.tabs button{white-space:nowrap;background:#e8eff1;color:#37515b;padding:10px 13px;min-height:40px}.tabs button.active{background:var(--teal);color:white}
+select,input[type=date]{font:inherit;border:1px solid #ccdadd;border-radius:10px;padding:10px;background:white;color:var(--ink);max-width:100%}.filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.chartbox{position:relative;width:100%;height:220px}.chartbox canvas{width:100%;height:100%;display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:7px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.insight{padding:12px;border-radius:13px;background:#f5f9fa;border-left:4px solid var(--teal);margin:9px 0;font-size:14px}.insight.warn{border-left-color:#c78320;background:#fff9ed}.insight.good{border-left-color:#23835a;background:#effaf4}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:650}td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{overflow:auto}.small{font-size:12px;color:var(--muted)}.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 20px 28px}
+@media(min-width:650px){main{padding:20px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}.twocol .panel{min-width:0}}
+@media print{body{background:white}header{background:white;color:#123c4a;padding:8px 0;border-radius:0}header p{color:#333}main{padding:0}.no-print,button,.tabs,.filters{display:none!important}.panel{box-shadow:none;break-inside:avoid}.grid{grid-template-columns:repeat(4,1fr)}footer{display:none}}
+</style>
+</head>
+<body>
+<header><div class="headrow"><div class="logo">♥</div><div><h1>GloryFit Health Analyzer</h1><p>Understand your trends. One step at a time.</p></div></div></header>
+<main>
+<div class="notice"><strong>For personal tracking, not diagnosis.</strong> GloryFit measurements and sleep-stage/stress estimates can be inaccurate. This app processes imported files in your browser; it does not send them to a health service. Seek medical advice for concerns and urgent care for severe symptoms.</div>
+
+<section class="panel no-print" id="importPanel">
+<h2>1. Load your GloryFit data</h2>
+<p class="sub">Choose the <b>HealthDataExport.zip</b> file from the iPhone Files app. The app reads the five CSV files inside it. You can import a newer export later to update your history.</p>
+<div class="actions">
+<label class="button filelabel"><input id="zipInput" type="file" accept=".zip,application/zip">📦 Choose ZIP export</label>
+<label class="button secondary filelabel"><input id="csvInput" type="file" accept=".csv,text/csv" multiple>Choose CSV files</label>
+<button class="secondary" id="demoBtn" type="button">View sample dashboard</button>
+</div>
+<div class="status" id="importStatus">No data loaded yet. Your health records stay in this browser unless you export a backup.</div>
+<div class="actions" id="dataActions" hidden>
+<button class="secondary" id="backupBtn" type="button">Export app backup</button>
+<label class="button secondary filelabel"><input id="restoreInput" type="file" accept=".json,application/json">Restore backup</label>
+<button class="ghost" id="clearBtn" type="button">Clear saved data</button>
+</div>
+<p class="small">ZIP reading uses JSZip from a public CDN, so an internet connection is needed when importing a ZIP. If it cannot load, try the CSV files option. The app itself is a single GitHub Pages page.</p>
+</section>
+
+<section class="panel" id="dashboard">
+<div class="filters"><label for="period">View:</label><select id="period"><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option><option value="all">All history</option><option value="custom">Choose dates</option></select><span id="customDates" class="hidden"><input type="date" id="fromDate" aria-label="Start date"><input type="date" id="toDate" aria-label="End date"></span><button class="secondary" id="applyBtn" type="button">Apply</button></div>
+<div class="grid" id="metrics">
+<div class="metric"><div class="label">Sleep last night</div><div class="value">—</div><div class="hint">Import data to begin</div></div>
+<div class="metric"><div class="label">Latest SpO₂</div><div class="value">—</div><div class="hint">Latest imported reading</div></div>
+<div class="metric"><div class="label">Latest heart rate</div><div class="value">—</div><div class="hint">Latest imported reading</div></div>
+<div class="metric"><div class="label">Steps today</div><div class="value">—</div><div class="hint">Latest daily total</div></div>
+</div>
+<div id="summaryText" class="sub" style="margin-top:12px">Import your GloryFit ZIP to view your historical analysis.</div>
+</section>
+
+<div class="tabs no-print" role="tablist" aria-label="Health sections">
+<button class="active" data-tab="overview" type="button">Overview</button><button data-tab="heart" type="button">Heart rate</button><button data-tab="sleep" type="button">Sleep</button><button data-tab="oxygen" type="button">Blood oxygen</button><button data-tab="stress" type="button">Stress</button><button data-tab="activity" type="button">Activity</button>
+</div>
+
+<section class="panel tabpage" id="page-overview">
+<h2>Health overview</h2><div id="insights"><div class="insight">Import your export to receive observations about your trends.</div></div>
+<div class="twocol"><div class="panel"><h3>Sleep duration trend</h3><div class="chartbox"><canvas id="sleepChart"></canvas></div></div><div class="panel"><h3>Daily steps trend</h3><div class="chartbox"><canvas id="stepsChart"></canvas></div></div></div>
+<h3>Recent daily summary</h3><div class="tablewrap"><table><thead><tr><th>Date</th><th>Sleep</th><th>Avg HR</th><th>SpO₂ avg/min</th><th>Stress avg</th><th>Steps</th></tr></thead><tbody id="recentTable"><tr><td colspan="6">No imported data yet.</td></tr></tbody></table></div>
+</section>
+<section class="panel tabpage hidden" id="page-heart"><h2>Heart rate</h2><p class="sub">Daily averages and range from the exported readings. Activity context matters; a single high value is not a diagnosis.</p><div class="chartbox"><canvas id="heartChart"></canvas></div><div id="heartNotes"></div><h3>Recent days</h3><div class="tablewrap"><table><thead><tr><th>Date</th><th>Average</th><th>Lowest</th><th>Highest</th><th>Readings</th></tr></thead><tbody id="heartTable"></tbody></table></div></section>
+<section class="panel tabpage hidden" id="page-sleep"><h2>Sleep analysis</h2><p class="sub">Stage labels reflect GloryFit's exported stage codes. Wrist estimates are approximate, not equivalent to a clinical sleep study.</p><div class="chartbox"><canvas id="sleepStagesChart"></canvas></div><div id="sleepNotes"></div><h3>Recent nights</h3><div class="tablewrap"><table><thead><tr><th>Night/date</th><th>Total</th><th>Deep</th><th>Light</th><th>REM</th><th>Awake/other</th></tr></thead><tbody id="sleepTable"></tbody></table></div></section>
+<section class="panel tabpage hidden" id="page-oxygen"><h2>Blood oxygen (SpO₂)</h2><p class="sub">These are wearable readings. Motion, fit, circulation and device limitations can affect accuracy.</p><div class="chartbox"><canvas id="oxygenChart"></canvas></div><div id="oxygenNotes"></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Average</th><th>Lowest</th><th>Readings below 95%</th><th>Count</th></tr></thead><tbody id="oxygenTable"></tbody></table></div></section>
+<section class="panel tabpage hidden" id="page-stress"><h2>Stress estimate</h2><p class="sub">The exported field is named “pressure”; we display it as the GloryFit stress estimate, not blood pressure. Its precise algorithm and scale may be device-specific.</p><div class="chartbox"><canvas id="stressChart"></canvas></div><div id="stressNotes"></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Average score</th><th>Lowest</th><th>Highest</th><th>Readings</th></tr></thead><tbody id="stressTable"></tbody></table></div></section>
+<section class="panel tabpage hidden" id="page-activity"><h2>Activity</h2><p class="sub">Daily totals are taken from the latest cumulative step record for each date where available.</p><div class="chartbox"><canvas id="activityChart"></canvas></div><div id="activityNotes"></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Steps</th><th>Distance</th><th>Estimated calories</th><th>Target</th></tr></thead><tbody id="activityTable"></tbody></table></div></section>
+
+<section class="panel no-print"><h2>Print or save report</h2><p class="sub">Print the currently visible report, or save a private JSON backup of your processed daily summaries.</p><div class="actions"><button id="printBtn" type="button">🖨️ Print report</button><button class="secondary" id="backupBtn2" type="button">Export app backup</button></div></section>
+</main>
+<footer>GloryFit Health Analyzer · Personal tracking tool · Data remains in this browser unless you export it.</footer>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const DBKEY='gloryfitAnalyzerDailyV1';
+let db={}, loaded=false, isDemo=false, currentTab='overview';
+const colors={teal:'#087e8b',purple:'#8a6bd1',light:'#c5adf4',red:'#dc686d',orange:'#e6a43c',blue:'#5489cc',green:'#3a9a72',grid:'#e5edef',text:'#647780'};
+const fmt=(n,d=0)=>Number.isFinite(n)?Number(n).toLocaleString('en-SG',{maximumFractionDigits:d,minimumFractionDigits:d}):'—';
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const min=a=>a.length?Math.min(...a):null, max=a=>a.length?Math.max(...a):null;
+function dayObj(d){return db[d]||(db[d]={date:d,hr:[],spo2:[],stress:[],sleep:{deep:0,light:0,rem:0,other:0},sleepMinutes:0,steps:null,distance:null,calories:null,target:null});}
+function parseDate(s){if(!s)return null;let m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:null;}
+function parseCSV(text){
+ let rows=[],row=[],cell='',quoted=false;
+ text=text.replace(/^\uFEFF/,'');
+ for(let i=0;i<text.length;i++){let c=text[i];if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"')quoted=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell);if(row.some(v=>v!==''))rows.push(row);row=[];cell='';}else if(c!=='\r')cell+=c;}
+ if(cell!==''||row.length){row.push(cell);rows.push(row);}
+ if(!rows.length)return [];
+ const headers=rows.shift().map(x=>x.trim());
+ return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]||'').trim()])));
+}
+function num(v){if(v===undefined||v===null||v==='')return null;let n=Number(v);return Number.isFinite(n)?n:null;}
+function parseStamp(s){let m=String(s||'').match(/^(\d{4})-(\d\d)-(\d\d)(?:-(\d\d)[:-]?(\d\d))?/);return m?{date:`${m[1]}-${m[2]}-${m[3]}`,hour:Number(m[4]||0),minute:Number(m[5]||0)}:null;}
+function addRows(name,rows){
+ let count=0;
+ if(name==='heart_rate.csv')for(const r of rows){let d=parseDate(r.heartDate);let v=num(r.heartCount);if(d&&v!==null&&v>20&&v<250){dayObj(d).hr.push(v);count++;}}
+ if(name==='blood_oxygen.csv')for(const r of rows){let p=parseStamp(r.time),v=num(r.value);if(p&&v!==null&&v>=50&&v<=100){dayObj(p.date).spo2.push(v);count++;}}
+ if(name==='mood_pressure.csv')for(const r of rows){let p=parseStamp(r.time),v=num(r.pressure);if(p&&v!==null&&v>=0&&v<=200){dayObj(p.date).stress.push(v);count++;}}
+ if(name==='sleep.csv')for(const r of rows){let a=parseStamp(r.startTime),b=parseStamp(r.endTime);if(!a||!b)continue;let start=new Date(`${a.date}T${String(a.hour).padStart(2,'0')}:${String(a.minute).padStart(2,'0')}:00`);let end=new Date(`${b.date}T${String(b.hour).padStart(2,'0')}:${String(b.minute).padStart(2,'0')}:00`);let mins=(end-start)/60000;if(mins<0||mins>720)continue;let d=parseDate(r.timeFlag)||b.date;let o=dayObj(d);let type=String(r.sleepType);if(type==='1')o.sleep.deep+=mins;else if(type==='2')o.sleep.light+=mins;else if(type==='3')o.sleep.rem+=mins;else o.sleep.other+=mins;count++;}
+ if(name==='steps.csv')for(const r of rows){let p=parseStamp(r.time),steps=num(r.totalSteps);if(!p||steps===null)continue;let o=dayObj(p.date);if(o.steps===null||p.hour*60+p.minute>= (o._stepMinute||-1)){o.steps=steps;o.distance=num(r.distances);o.calories=num(r.calories);o.target=num(r.targetSteps);o._stepMinute=p.hour*60+p.minute;}count++;}
+ return count;
+}
+function finalize(){for(const o of Object.values(db)){o.sleepMinutes=o.sleep.deep+o.sleep.light+o.sleep.rem;delete o._stepMinute;}}
+function dateKeys(){return Object.keys(db).filter(k=>Object.values(db[k]).some(v=>Array.isArray(v)?v.length>0:false)||db[k].steps!==null||db[k].sleepMinutes>0).sort();}
+function filteredKeys(){let keys=dateKeys(),period=$('period').value;if(!keys.length)return [];let end=keys[keys.length-1],start=null;if(period==='custom'){start=$('fromDate').value||keys[0];end=$('toDate').value||end;}else if(period!=='all'){let days=Number(period);let endD=new Date(end+'T12:00:00');endD.setDate(endD.getDate()-days+1);start=endD.toISOString().slice(0,10);}return keys.filter(k=>(!start||k>=start)&&k<=end);}
+function dateLabel(d){return d.slice(5).replace('-','/');}
+function minsText(m){if(!Number.isFinite(m)||m<=0)return '—';return `${Math.floor(m/60)}h ${Math.round(m%60)}m`;}
+function aggregate(keys){let vals={hr:[],spo2:[],stress:[],sleep:[],steps:[]};keys.forEach(k=>{let o=db[k];if(o.hr.length)vals.hr.push(avg(o.hr));if(o.spo2.length)vals.spo2.push(avg(o.spo2));if(o.stress.length)vals.stress.push(avg(o.stress));if(o.sleepMinutes>0)vals.sleep.push(o.sleepMinutes);if(o.steps!==null)vals.steps.push(o.steps)});return vals;}
+function chart(id,labels,series,opts={}){
+ const c=$(id);if(!c)return;const ctx=c.getContext('2d'),rect=c.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);const w=Math.max(280,rect.width||c.parentElement.clientWidth||320),h=rect.height||220;c.width=w*dpr;c.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const pad={l:38,r:10,t:12,b:30},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+ const all=series.flatMap(s=>s.values.filter(v=>v!==null&&Number.isFinite(v)));if(!all.length){ctx.fillStyle=colors.text;ctx.font='14px sans-serif';ctx.fillText('No data for this period',pad.l+6,h/2);return;}
+ let lo=opts.min!==undefined?opts.min:Math.floor(Math.min(...all)*.9),hi=opts.max!==undefined?opts.max:Math.ceil(Math.max(...all)*1.08);if(hi===lo)hi=lo+1;if(opts.zero){lo=0;}const y=v=>pad.t+(hi-v)/(hi-lo)*ph;
+ ctx.strokeStyle=colors.grid;ctx.fillStyle=colors.text;ctx.font='11px sans-serif';ctx.textAlign='right';for(let i=0;i<5;i++){let v=lo+(hi-lo)*i/4,yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();ctx.fillText(opts.yfmt?opts.yfmt(v):fmt(v),pad.l-6,yy+4);}
+ const step=labels.length>1?pw/(labels.length-1):pw;const x=i=>pad.l+(labels.length>1?i*step:pw/2);
+ series.forEach(s=>{ctx.strokeStyle=s.color;ctx.lineWidth=2;ctx.beginPath();let active=false;s.values.forEach((v,i)=>{if(v===null||!Number.isFinite(v)){active=false;return;}if(!active){ctx.moveTo(x(i),y(v));active=true;}else ctx.lineTo(x(i),y(v));});ctx.stroke();if(labels.length<18){s.values.forEach((v,i)=>{if(v===null||!Number.isFinite(v))return;ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(x(i),y(v),2.5,0,Math.PI*2);ctx.fill();});}});
+ ctx.textAlign='center';let n=Math.min(6,labels.length);for(let i=0;i<n;i++){let ix=n===1?0:Math.round(i*(labels.length-1)/(n-1));ctx.fillStyle=colors.text;ctx.fillText(labels[ix],x(ix),h-8);}
+}
+function addLegend(target,items){$(target).innerHTML='<div class="legend">'+items.map(x=>`<span><i class="dot" style="background:${x.color}"></i>${x.label}</span>`).join('')+'</div>';}
+function metric(label,value,hint){return `<div class="metric"><div class="label">${label}</div><div class="value">${value}</div><div class="hint">${hint}</div></div>`;}
+function setTable(id,rows,cols){$(id).innerHTML=rows.length?rows.map(r=>'<tr>'+cols.map(c=>`<td class="${c.num?'num':''}">${c.get(r)}</td>`).join('')+'</tr>').join(''):`<tr><td colspan="${cols.length}">No data for this period.</td></tr>`;}
+function render(){
+ finalize();const keys=filteredKeys(),all=dateKeys(),last=all[all.length-1],lastObj=last?db[last]:null;
+ const latestHR=lastObj&&lastObj.hr.length?lastObj.hr[lastObj.hr.length-1]:null;
+ const recentSleep=all.filter(k=>db[k].sleepMinutes>0).slice(-1)[0],sObj=recentSleep?db[recentSleep]:null;
+ $('metrics').innerHTML=[
+ metric('Latest sleep',sObj?minsText(sObj.sleepMinutes):'—',recentSleep||'No sleep data'),
+ metric('Latest SpO₂',lastObj&&lastObj.spo2.length?fmt(lastObj.spo2[lastObj.spo2.length-1])+'%':'—','Last recorded day: '+(last||'—')),
+ metric('Latest heart rate',latestHR!==null?fmt(latestHR)+' bpm':'—','Latest recorded day: '+(last||'—')),
+ metric('Latest steps',lastObj&&lastObj.steps!==null?fmt(lastObj.steps):'—','Daily total: '+(last||'—'))
+ ].join('');
+ if(!keys.length){$('summaryText').textContent='Import your GloryFit ZIP to view your historical analysis.';return;}
+ const a=aggregate(keys),start=keys[0],end=keys[keys.length-1];
+ $('summaryText').textContent=`Showing ${keys.length} days with records from ${start} to ${end}. Imported history spans ${all[0]} to ${all[all.length-1]}.`;
+ let ins=[];
+ if(a.sleep.length){let m=avg(a.sleep);ins.push({type:m>=420&&m<=600?'good':'',text:`Average recorded sleep in this view: ${minsText(m)} per night. Many adults do well with around 7–9 hours; use how you feel and your clinician's advice alongside the watch estimate.`});}
+ let sp=keys.map(k=>db[k].spo2).flat();if(sp.length){let mn=min(sp),below=sp.filter(v=>v<95).length;ins.push({type:mn<90?'warn':'',text:`Blood oxygen records range from ${fmt(mn)}% to ${fmt(max(sp))}% in this view; ${below} individual readings are below 95%. Wrist readings can be inaccurate. Repeated low readings, especially with symptoms, deserve confirmation with a fingertip oximeter and medical advice.`});}
+ let hrs=keys.map(k=>db[k].hr).flat();if(hrs.length){ins.push({type:'',text:`Heart-rate readings in this view range from ${fmt(min(hrs))} to ${fmt(max(hrs))} bpm. High values during activity must be interpreted with activity intensity and symptoms; a daily maximum alone cannot diagnose a problem.`});}
+ let stress=keys.map(k=>db[k].stress).flat();if(stress.length){ins.push({type:'',text:`Average exported “pressure” score in this view: ${fmt(avg(stress),1)}. The export field is not blood pressure; it appears to represent a device stress estimate. Compare trends under similar conditions.`});}
+ let steps=keys.map(k=>db[k].steps).filter(v=>v!==null);if(steps.length){ins.push({type:'good',text:`Average recorded daily steps in this view: ${fmt(avg(steps))}. Compare with your own baseline and choose a comfortable, sustainable activity level.`});}
+ $('insights').innerHTML=ins.map(i=>`<div class="insight ${i.type}">${i.text}</div>`).join('');
+ const labels=keys.map(dateLabel), sleepVals=keys.map(k=>db[k].sleepMinutes>0?db[k].sleepMinutes:null), stepVals=keys.map(k=>db[k].steps),hrVals=keys.map(k=>db[k].hr.length?avg(db[k].hr):null),o2Vals=keys.map(k=>db[k].spo2.length?avg(db[k].spo2):null),stressVals=keys.map(k=>db[k].stress.length?avg(db[k].stress):null);
+ chart('sleepChart',labels,[{label:'Sleep minutes',values:sleepVals,color:colors.purple}],{min:0,max:720,yfmt:v=>Math.round(v/60)+'h'});
+ chart('stepsChart',labels,[{label:'Steps',values:stepVals,color:colors.teal}],{min:0,zero:true,yfmt:v=>fmt(v/1000,1)+'k'});
+ chart('heartChart',labels,[{label:'Average heart rate',values:hrVals,color:colors.red}],{min:40,max:180,yfmt:v=>fmt(v)});
+ chart('oxygenChart',labels,[{label:'Average SpO₂',values:o2Vals,color:colors.green}],{min:85,max:100,yfmt:v=>fmt(v)+'%'});
+ chart('stressChart',labels,[{label:'Average stress estimate',values:stressVals,color:colors.orange}],{min:0,yfmt:v=>fmt(v)});
+ chart('activityChart',labels,[{label:'Steps',values:stepVals,color:colors.teal}],{min:0,zero:true,yfmt:v=>fmt(v/1000,1)+'k'});
+ const recent=keys.slice(-14).reverse();
+ setTable('recentTable',recent.map(k=>({k,o:db[k]})),[
+ {get:r=>r.k},{get:r=>r.o.sleepMinutes?minsText(r.o.sleepMinutes):'—'},
+ {get:r=>r.o.hr.length?fmt(avg(r.o.hr),0):'—',num:true},
+ {get:r=>r.o.spo2.length?`${fmt(avg(r.o.spo2),1)} / ${fmt(min(r.o.spo2))}%`:'—',num:true},
+ {get:r=>r.o.stress.length?fmt(avg(r.o.stress),1):'—',num:true},
+ {get:r=>r.o.steps===null?'—':fmt(r.o.steps),num:true}]);
+ setTable('heartTable',recent.filter(r=>db[r].hr.length).map(k=>({k,o:db[k]})),[{get:r=>r.k},{get:r=>fmt(avg(r.o.hr),1),num:true},{get:r=>fmt(min(r.o.hr)),num:true},{get:r=>fmt(max(r.o.hr)),num:true},{get:r=>fmt(r.o.hr.length),num:true}]);
+ const heartAll=keys.flatMap(k=>db[k].hr);$('heartNotes').innerHTML=heartAll.length?`<div class="insight">This view contains ${fmt(heartAll.length)} heart-rate samples. A single high reading can reflect activity or sensor error. If a rapid rate persists while resting, or is accompanied by chest pain, breathlessness or faintness, seek medical help.</div>`:'';
+ setTable('sleepTable',recent.filter(k=>db[k].sleepMinutes>0).map(k=>({k,o:db[k]})),[{get:r=>r.k},{get:r=>minsText(r.o.sleepMinutes)},{get:r=>minsText(r.o.sleep.deep)},{get:r=>minsText(r.o.sleep.light)},{get:r=>minsText(r.o.sleep.rem)},{get:r=>minsText(r.o.sleep.other)}]);
+ const stageSeries=[{label:'Deep',values:keys.map(k=>db[k].sleep.deep||null),color:colors.purple},{label:'Light',values:keys.map(k=>db[k].sleep.light||null),color:colors.light},{label:'REM',values:keys.map(k=>db[k].sleep.rem||null),color:colors.red}];chart('sleepStagesChart',labels,stageSeries,{min:0,yfmt:v=>Math.round(v)+'m'});addLegend('sleepNotes',stageSeries.map(s=>({label:s.label,color:s.color})));$('sleepNotes').innerHTML+='<div class="insight">Stage totals are estimated by the watch. Consistent sleep duration and daytime alertness are often more useful than chasing a specific stage percentage.</div>';
+ const oxygenRows=recent.filter(k=>db[k].spo2.length).map(k=>({k,o:db[k]}));setTable('oxygenTable',oxygenRows,[{get:r=>r.k},{get:r=>fmt(avg(r.o.spo2),1)+'%',num:true},{get:r=>fmt(min(r.o.spo2))+'%',num:true},{get:r=>fmt(r.o.spo2.filter(v=>v<95).length),num:true},{get:r=>fmt(r.o.spo2.length),num:true}]);
+ const stressRows=recent.filter(k=>db[k].stress.length).map(k=>({k,o:db[k]}));setTable('stressTable',stressRows,[{get:r=>r.k},{get:r=>fmt(avg(r.o.stress),1),num:true},{get:r=>fmt(min(r.o.stress)),num:true},{get:r=>fmt(max(r.o.stress)),num:true},{get:r=>fmt(r.o.stress.length),num:true}]);
+ const activityRows=recent.filter(k=>db[k].steps!==null).map(k=>({k,o:db[k]}));setTable('activityTable',activityRows,[{get:r=>r.k},{get:r=>fmt(r.o.steps),num:true},{get:r=>r.o.distance!==null?fmt(r.o.distance/1000,2)+' km':'—',num:true},{get:r=>r.o.calories!==null?fmt(r.o.calories,0):'—',num:true},{get:r=>r.o.target!==null?fmt(r.o.target):'—',num:true}]);
+ $('oxygenNotes').innerHTML='<div class="insight">For repeated low overnight oxygen readings, confirm with a properly used fingertip oximeter and discuss persistent concerns with a clinician. Do not rely on a watch alone to diagnose sleep apnoea.</div>';
+ $('stressNotes').innerHTML='<div class="insight">This is a device estimate, not a clinical stress test. The export uses a field named “pressure”, but the app does not treat it as blood pressure.</div>';
+ $('activityNotes').innerHTML=`<div class="insight">This view's average daily step total is ${steps.length?fmt(avg(steps)):'—'}. The latest daily total can be incomplete if the export was made before the day ended.</div>`;
+ $('dataActions').hidden=!loaded;
+}
+function mergeDatabase(newdb){for(const [d,o] of Object.entries(newdb)){db[d]=o;}}
+function save(){try{localStorage.setItem(DBKEY,JSON.stringify(db));$('importStatus').textContent='Saved in this browser on this device. Imported data is not uploaded to a server.';$('importStatus').className='status good';}catch(e){$('importStatus').textContent='Browser storage is full or unavailable. Export a backup and keep the original ZIP safe.';$('importStatus').className='status bad';}}
+async function importFiles(files){
+ $('importStatus').className='status';$('importStatus').textContent='Reading export…';let temp={};const old=db;db=temp;let totals=0,found=[];
+ try{
+  let list=[];
+  if(files.length===1&&files[0].name.toLowerCase().endsWith('.zip')){
+   if(!window.JSZip)throw new Error('ZIP reader did not load. Check your internet connection, reload the page, or choose the five CSV files instead.');
+   const zip=await JSZip.loadAsync(files[0]);
+   for(const name of ['heart_rate.csv','blood_oxygen.csv','mood_pressure.csv','sleep.csv','steps.csv']){const entry=Object.values(zip.files).find(f=>!f.dir&&f.name.toLowerCase().endsWith('/'+name)||(!f.dir&&f.name.toLowerCase()===name));if(entry)list.push({name,text:await entry.async('string')});}
+  }else{for(const f of files){if(f.name.toLowerCase().endsWith('.csv'))list.push({name:f.name,text:await f.text()});}}
+  if(!list.length)throw new Error('No recognised CSV files found. Choose HealthDataExport.zip or the CSV files inside it.');
+  for(const f of list){let name=f.name.split('/').pop().toLowerCase();if(['heart_rate.csv','blood_oxygen.csv','mood_pressure.csv','sleep.csv','steps.csv'].includes(name)){let n=addRows(name,parseCSV(f.text));totals+=n;found.push(`${name}: ${n.toLocaleString()} rows`);}}
+  finalize();const newdb=db;db=old;mergeDatabase(newdb);finalize();loaded=true;isDemo=false;save();render();$('importStatus').textContent=`Import complete. ${found.join(' · ')}. Daily summaries are saved on this device.`;$('importStatus').className='status good';
+ }catch(e){db=old;$('importStatus').textContent='Could not import: '+e.message;$('importStatus').className='status bad';}
+}
+function backup(){const blob=new Blob([JSON.stringify({format:'GloryFitHealthAnalyzerBackupV1',exportedAt:new Date().toISOString(),daily:db},null,2)],{type:'application/json'});download(blob,'gloryfit-health-backup.json');}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function restore(file){const reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(x.format!=='GloryFitHealthAnalyzerBackupV1'||!x.daily)throw Error('This does not look like an app backup.');db=x.daily;loaded=true;isDemo=false;save();render();$('importStatus').textContent='Backup restored on this device.';$('importStatus').className='status good';}catch(e){$('importStatus').textContent='Restore failed: '+e.message;$('importStatus').className='status bad';}};reader.readAsText(file);}
+function demo(){db={};for(let i=0;i<30;i++){let d=new Date();d.setDate(d.getDate()-29+i);let k=d.toISOString().slice(0,10),o=dayObj(k);o.hr=[62+i%7,70+i%9,78+i%10];o.spo2=[96,97,98];o.stress=[42+i%15,52+i%9];o.sleep={deep:75+i%20,light:300+i%30,rem:65+i%15,other:10};o.sleepMinutes=o.sleep.deep+o.sleep.light+o.sleep.rem;o.steps=3000+i*120;o.distance=o.steps*.00075*1000;o.calories=90+i*4;o.target=8000;}loaded=true;isDemo=true;$('importStatus').textContent='Sample dashboard only. These are fictional example values; import your own ZIP for real analysis.';$('importStatus').className='status';render();}
+$('zipInput').addEventListener('change',e=>{if(e.target.files.length)importFiles([...e.target.files]);e.target.value='';});
+$('csvInput').addEventListener('change',e=>{if(e.target.files.length)importFiles([...e.target.files]);e.target.value='';});
+$('restoreInput').addEventListener('change',e=>{if(e.target.files[0])restore(e.target.files[0]);e.target.value='';});
+$('backupBtn').addEventListener('click',backup);$('backupBtn2').addEventListener('click',backup);
+$('clearBtn').addEventListener('click',()=>{if(confirm('Clear all saved health summaries from this browser? Export a backup first if you may need this data.')){db={};loaded=false;localStorage.removeItem(DBKEY);$('importStatus').textContent='Saved data cleared from this browser.';$('importStatus').className='status';render();}});
+$('demoBtn').addEventListener('click',demo);$('period').addEventListener('change',()=>{$('customDates').classList.toggle('hidden',$('period').value!=='custom');});$('applyBtn').addEventListener('click',render);$('printBtn').addEventListener('click',()=>window.print());
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{currentTab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tabpage').forEach(x=>x.classList.toggle('hidden',x.id!=='page-'+currentTab));setTimeout(render,30);}));
+try{const saved=localStorage.getItem(DBKEY);if(saved){db=JSON.parse(saved);loaded=true;$('importStatus').textContent='Previously imported data found on this device.';$('importStatus').className='status good';}}catch(e){}
+render();window.addEventListener('resize',()=>{clearTimeout(window.__chartResize);window.__chartResize=setTimeout(render,180);});
+})();
+</script>
+</body>
+</html>
