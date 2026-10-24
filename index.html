@@ -67,10 +67,10 @@ const $=id=>document.getElementById(id),KEY='gloryfitCoachV2';let db={};
 const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null, min=a=>a.length?Math.min(...a):null,max=a=>a.length?Math.max(...a):null;
 const n=v=>{if(v===undefined||v===null||v==='')return null;const x=Number(v);return Number.isFinite(x)?x:null},fmt=(v,d=0)=>v===null||!Number.isFinite(v)?'—':Number(v).toLocaleString('en-SG',{maximumFractionDigits:d,minimumFractionDigits:d});
 const dur=m=>m===null||m<=0?'—':Math.floor(m/60)+'h '+Math.round(m%60)+'m';
-const date=s=>{const m=String(s||'').match(/^(\\d{4})-(\\d\\d)-(\\d\\d)/);return m?`${m[1]}-${m[2]}-${m[3]}`:null};
-const stamp=s=>{const m=String(s||'').match(/^(\\d{4})-(\\d\\d)-(\\d\\d)(?:-(\\d\\d)[:-]?(\\d\\d))?/);return m?{date:`${m[1]}-${m[2]}-${m[3]}`,minute:Number(m[4]||0)*60+Number(m[5]||0)}:null};
+const date=s=>{const m=String(s||'').match(/^(\d{4})-(\d\d)-(\d\d)/);return m?`${m[1]}-${m[2]}-${m[3]}`:null};
+const stamp=s=>{const m=String(s||'').match(/^(\d{4})-(\d\d)-(\d\d)(?:-(\d\d)[-:]?(\d\d))?/);return m?{date:`${m[1]}-${m[2]}-${m[3]}`,minute:Number(m[4]||0)*60+Number(m[5]||0)}:null};
 const day=d=>db[d]||(db[d]={date:d,hr:[],o2:[],stress:[],sleep:{deep:0,light:0,rem:0,other:0},sleepTotal:0,steps:null,distance:null,calories:null});
-function csv(text){text=text.replace(/^\\uFEFF/,'');let rows=[],r=[],v='',q=false;for(let i=0;i<text.length;i++){let c=text[i];if(q){if(c==='"'&&text[i+1]==='"'){v+='"';i++}else if(c==='"')q=false;else v+=c}else if(c==='"')q=true;else if(c===','){r.push(v);v=''}else if(c==='\\n'){r.push(v);if(r.some(x=>x!==''))rows.push(r);r=[];v=''}else if(c!=='\\r')v+=c}if(v||r.length){r.push(v);rows.push(r)}const h=(rows.shift()||[]).map(x=>x.trim());return rows.map(row=>Object.fromEntries(h.map((k,i)=>[k,(row[i]||'').trim()])))}
+function csv(text){text=text.replace(/^\uFEFF/,'');let rows=[],r=[],v='',q=false;for(let i=0;i<text.length;i++){let c=text[i];if(q){if(c==='"'&&text[i+1]==='"'){v+='"';i++}else if(c==='"')q=false;else v+=c}else if(c==='"')q=true;else if(c===','){r.push(v);v=''}else if(c==='\n'){r.push(v);if(r.some(x=>x!==''))rows.push(r);r=[];v=''}else if(c!=='\r')v+=c}if(v||r.length){r.push(v);rows.push(r)}const h=(rows.shift()||[]).map(x=>x.trim());return rows.map(row=>Object.fromEntries(h.map((k,i)=>[k,(row[i]||'').trim()])))}
 function add(name,rows){let count=0;
 if(name==='heart_rate.csv')for(const r of rows){const d=date(r.heartDate),v=n(r.heartCount);if(d&&v!==null&&v>20&&v<250){day(d).hr.push(v);count++}}
 if(name==='blood_oxygen.csv')for(const r of rows){const p=stamp(r.time),v=n(r.value);if(p&&v!==null&&v>=50&&v<=100){day(p.date).o2.push(v);count++}}
